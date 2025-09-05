@@ -7,6 +7,8 @@ import com.shorterner.shorterner.exception.UrlNotFoundException;
 import com.shorterner.shorterner.repository.UrlRepository;
 import com.shorterner.shorterner.utils.CodeGen;
 import com.shorterner.shorterner.utils.Helper;
+import jakarta.transaction.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,19 +19,28 @@ public class UrlService {
         this.urlRepository = urlRepository;
     }
 
+    @Transactional
     public UrlOutput createUrl(CreateUrlInput input) {
         String longUrl = input.longUrl();
         String canonicalizeLongUrl = Helper.canonicalize(longUrl);
-        Url urlCreated = this.urlRepository.findByCanonicalLongUrl(canonicalizeLongUrl).orElseGet(() -> {
-            String code = CodeGen.codeFor(longUrl);
-            Url url = Url.builder()
-                    .longUrl(longUrl)
-                    .canonicalLongUrl(canonicalizeLongUrl)
-                    .code(code)
-                    .build();
-            return this.urlRepository.save(url);
-        });
-        return UrlOutput.fromEntity(urlCreated);
+        return this.urlRepository
+                .findByCanonicalLongUrl(canonicalizeLongUrl)
+                .map(UrlOutput::fromEntity)
+                .orElseGet(() -> {
+                    String code = CodeGen.codeFor(canonicalizeLongUrl);
+                    Url url = Url.builder()
+                            .longUrl(longUrl)
+                            .canonicalLongUrl(canonicalizeLongUrl)
+                            .code(code)
+                            .build();
+                    try {
+                        return UrlOutput.fromEntity(urlRepository.save(url));
+                    } catch (DataIntegrityViolationException e) {
+                        return urlRepository.findByCanonicalLongUrl(canonicalizeLongUrl)
+                                .map(UrlOutput::fromEntity)
+                                .orElseThrow(() -> e);
+                    }
+                });
     }
 
     public String lookupUrl(String code) {
