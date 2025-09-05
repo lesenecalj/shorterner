@@ -19,20 +19,16 @@ public class UrlService {
 
     public UrlOutput createUrl(CreateUrlInput input) {
         String longUrl = input.longUrl();
-        if (longUrl == null || longUrl.isBlank()) {
-            throw new IllegalArgumentException("URL cannot be empty");
-        }
-
-        if (!Helper.validLongUrl(longUrl)) {
-            throw new IllegalArgumentException("Wrong Url");
-        }
-
-        String code = CodeGen.codeFor(longUrl);
-        Url url = Url.builder()
-                .longUrl(longUrl)
-                .code(code)
-                .build();
-        Url urlCreated = this.urlRepository.save(url);
+        String canonicalizeLongUrl = Helper.canonicalize(longUrl);
+        Url urlCreated = this.urlRepository.findByCanonicalLongUrl(canonicalizeLongUrl).orElseGet(() -> {
+            String code = CodeGen.codeFor(longUrl);
+            Url url = Url.builder()
+                    .longUrl(longUrl)
+                    .canonicalLongUrl(canonicalizeLongUrl)
+                    .code(code)
+                    .build();
+            return this.urlRepository.save(url);
+        });
         return UrlOutput.fromEntity(urlCreated);
     }
 
