@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface UrlRepository extends JpaRepository<Url, UUID> {
     Optional<Url> findByCode(String code);
+    Optional<Url> findByCanonicalLongUrl(String canonicalLongUrl);
 }
