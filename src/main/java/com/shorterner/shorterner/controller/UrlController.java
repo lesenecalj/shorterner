@@ -34,7 +34,7 @@ public class UrlController {
                 .build();
     }
 
-    @PutMapping("/{code}")
+    @PatchMapping("/{code}")
     public ResponseEntity<UrlOutput> update(
             @PathVariable String code,
             @Valid @RequestBody UpdateUrlInput input
