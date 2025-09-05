@@ -19,6 +19,10 @@ public class UrlService {
         this.urlRepository = urlRepository;
     }
 
+    public Url getUrlByCode(String code) {
+        return this.urlRepository.findByCode(code).orElse(null);
+    }
+
     @Transactional
     public UrlOutput createUrl(CreateUrlInput input) {
         String longUrl = input.longUrl();
@@ -51,8 +55,27 @@ public class UrlService {
         return url.getLongUrl();
     }
 
-    public Url getUrlByCode(String code) {
-        return this.urlRepository.findByCode(code).orElse(null);
-    }
+    @Transactional
+    public UrlOutput update(String code, String newLongUrl) {
+        Url url = this.getUrlByCode(code);
+        if (url == null) {
+            throw new UrlNotFoundException("No URL found for code: " + code);
+        }
 
+        String canonical = Helper.canonicalize(newLongUrl);
+
+        this.urlRepository.findByCanonicalLongUrl(canonical).ifPresent(existing -> {
+            if (!existing.getId().equals(url.getId())) {
+                throw new DataIntegrityViolationException("This long URL is already used by another short code.");
+            }
+        });
+
+        try {
+            url.setLongUrl(newLongUrl);
+            url.setCanonicalLongUrl(canonical);
+            return UrlOutput.fromEntity(this.urlRepository.save(url));
+        } catch (DataIntegrityViolationException ex) {
+            throw new DataIntegrityViolationException("This long URL is already used by another short code.");
+        }
+    }
 }
