@@ -4,11 +4,11 @@ import com.shorterner.shorterner.dto.input.CreateUrlInput;
 import com.shorterner.shorterner.dto.output.UrlOutput;
 import com.shorterner.shorterner.service.UrlService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/v1/urls")
@@ -22,5 +22,13 @@ public class UrlController {
     public ResponseEntity<UrlOutput> create (@Valid @RequestBody CreateUrlInput input) {
         UrlOutput url = this.urlService.createUrl(input);
         return ResponseEntity.status(201).body(url);
+    }
+
+    @GetMapping("/r/{code}")
+    public ResponseEntity<Void> lookup (@PathVariable("code") String code) {
+        String longUrl = this.urlService.lookupUrl(code);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(longUrl))
+                .build();
     }
 }
