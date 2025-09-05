@@ -4,8 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,6 +13,8 @@ import java.util.UUID;
 
 @Entity()
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Builder
 public class Url {
     @Id
@@ -32,5 +33,4 @@ public class Url {
     @UpdateTimestamp
     @Column(nullable = false, name="updated_at")
     private Instant updatedAt;
-
 }
