@@ -24,20 +24,32 @@ public class Url {
     @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(nullable = false, name="long_url", columnDefinition="text")
+    @Column(nullable = false, name = "long_url", columnDefinition = "text")
     private String longUrl;
 
-    @Column(nullable = false, name="canonical_long_url", columnDefinition="text", unique = true)
+    @Column(nullable = false, name = "canonical_long_url", columnDefinition = "text", unique = true)
     private String canonicalLongUrl;
 
-    @Column(nullable = false, name="code", unique = true)
+    @Column(nullable = false, name = "code", unique = true)
     private String code;
 
     @CreationTimestamp
-    @Column(nullable = false, name="created_at", updatable = false)
+    @Column(nullable = false, name = "created_at", updatable = false)
     private Instant createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false, name="updated_at")
+    @Column(nullable = false, name = "updated_at")
     private Instant updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        Instant now = Instant.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
 }
