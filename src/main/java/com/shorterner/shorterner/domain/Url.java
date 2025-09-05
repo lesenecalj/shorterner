@@ -22,8 +22,8 @@ public class Url {
     @Column(nullable = false, name="long_url")
     private String longUrl;
 
-    @Column(nullable = false, name="short_url")
-    private String shortUrl;
+    @Column(nullable = false, name="code")
+    private String code;
 
     @CreationTimestamp
     @Column(nullable = false, name="created_at", updatable = false)

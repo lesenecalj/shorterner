@@ -8,7 +8,7 @@ import java.util.UUID;
 public record UrlOutput(
         UUID id,
         String longUrl,
-        String shortUrl,
+        String code,
         Instant createdAt,
         Instant updatedAt
 ) {
@@ -16,7 +16,7 @@ public record UrlOutput(
         return new UrlOutput(
                 url.getId(),
                 url.getLongUrl(),
-                url.getShortUrl(),
+                url.getCode(),
                 url.getCreatedAt(),
                 url.getUpdatedAt()
         );
